@@ -1,0 +1,63 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.bmuschko:gradle-docker-plugin:2.6.1'
+    }
+}
+
+apply plugin: 'com.bmuschko.docker-remote-api'
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+
+def dockerRemoteApi = 'http://localhost:2375'
+def registryUrl     = 'localhost:5043'
+
+
+docker {
+    url = dockerRemoteApi
+    registryCredentials {
+        url = "https://$registryUrl"
+    }
+}
+
+/**
+ * Build the Dockerfile
+ */
+task createDockerfile(type: Dockerfile) {
+    destFile = project.file('build/docker/Dockerfile')
+    from "java:8"
+    volume("/logs", "/tmp", "/config")
+    addFile(jar.archiveName, "/${jar.archiveName}")
+    runCommand("bash -c 'touch /${jar.archiveName}'")
+    entryPoint("java", "-jar", "/${jar.archiveName}")
+
+    doFirst {
+        copy {
+            from jar
+            into "build/docker/"
+        }
+    }
+}
+
+/**
+ * Creates image using the remote api
+ */
+task dockerBuildImage(type: DockerBuildImage) {
+    dependsOn createDockerfile
+    def serviceName = rootProject.name;
+    inputDir = createDockerfile.destFile.parentFile
+    tag = "$registryUrl/${rootProject.name}:${project.version}"
+}
+
+/**
+ * pushes image to registry
+ */
+task dockerPushImage(type: DockerPushImage) {
+    dependsOn dockerBuildImage
+    imageName = "$registryUrl/${rootProject.name}"
+}
+

@@ -1,0 +1,29 @@
+group 'de.jochenchrist'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    testCompile "junit:junit:4.11"
+}
+
+compileGroovy {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    options.encoding = "UTF-8"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
