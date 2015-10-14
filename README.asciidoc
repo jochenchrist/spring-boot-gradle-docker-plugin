@@ -7,11 +7,10 @@ Demo project to illustrate classpath issue with great gradle docker plugin https
 No value has been specified for property 'classpath'.
 ----
 
-Steps to reproduce:
----
+== Steps to reproduce:
 
 . Checkout this project
 . `./gradlew clean build publishToMavenLocal`
-. Checkout
+. Checkout https://github.com/jochenchrist/spring-boot-gradle-docker-plugin-demo-project
 . `./gradlew createDockerfile` works great.
 . `./gradlew dockerBuildImage` fails with `No value has been specified for property 'classpath'.`
